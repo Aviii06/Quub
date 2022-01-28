@@ -8,9 +8,11 @@ public class PlayerController : MonoBehaviour
 	private Rigidbody m_Rb;
 	private Collider m_Col;
 
-	public float m_GroundSpeed = 2.0f;
-	public float m_AirSpeed = 1.0f;
+	public float m_GroundSpeed = -0.4f;
+	public float m_AirSpeed = -0.2f;
 	public float m_JumpForce = 80.0f;
+
+	public float m_TerminalVelocity = 2.0f;
 
 	private float m_DistToGround;
 
@@ -35,11 +37,16 @@ public class PlayerController : MonoBehaviour
 
 		if (Input.GetButton("Jump") && isGrounded)
 		{
-			m_Rb.AddForce(transform.up * m_JumpForce);
+			m_Rb.AddForce(transform.up * m_JumpForce, ForceMode.Impulse);
 		}
-		Vector3 horizontalTranslation = Input.GetAxis("Horizontal") * transform.right * speed * Time.fixedDeltaTime;
-		Vector3 verticalTranslation = Input.GetAxis("Vertical") * transform.forward * speed * Time.fixedDeltaTime;
+		Vector3 horizontalTranslation = Input.GetAxis("Horizontal") * transform.right * speed;
+		Vector3 verticalTranslation = Input.GetAxis("Vertical") * transform.forward * speed;
 		Vector3 translation = horizontalTranslation + verticalTranslation;
-		transform.Translate(translation);
+
+		m_Rb.AddForce(translation, ForceMode.VelocityChange);
+		if (m_Rb.velocity.magnitude > m_TerminalVelocity) 
+		{
+			m_Rb.velocity = m_Rb.velocity.normalized * m_TerminalVelocity;
+		}
 	}
 }
