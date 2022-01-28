@@ -10,7 +10,8 @@ public class PlayerController : MonoBehaviour
 
 	public float m_GroundSpeed = -0.4f;
 	public float m_AirSpeed = -0.2f;
-	public float m_JumpForce = 80.0f;
+	public float m_JumpForce = 100.0f;
+	public float size = 10.0f;
 
 	public float m_TerminalVelocity = 2.0f;
 
@@ -29,7 +30,7 @@ public class PlayerController : MonoBehaviour
 	{
 		return Physics.Raycast(transform.position, -Vector3.up, m_DistToGround + EPSILON);
 	}
-
+	
 	void FixedUpdate()
 	{
 		bool isGrounded = IsGrounded();
@@ -40,8 +41,10 @@ public class PlayerController : MonoBehaviour
 			m_Rb.AddForce(transform.up * m_JumpForce, ForceMode.Impulse);
 		}
 		Vector3 horizontalTranslation = Input.GetAxis("Horizontal") * transform.right * speed;
-		Vector3 verticalTranslation = Input.GetAxis("Vertical") * transform.forward * speed;
-		Vector3 translation = horizontalTranslation + verticalTranslation;
+		//Vector3 verticalTranslation = Input.GetAxis("Vertical") * transform.forward * speed;
+		//Vector3 translation = horizontalTranslation + verticalTranslation;
+
+		Vector3 translation = horizontalTranslation;
 
 		m_Rb.AddForce(translation, ForceMode.VelocityChange);
 		if (m_Rb.velocity.magnitude > m_TerminalVelocity) 
