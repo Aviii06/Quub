@@ -14,31 +14,63 @@ public class PlayerController : MonoBehaviour
 
 	public float m_TerminalVelocity = 2.0f;
 
-	private float m_DistToGround;
-
 	private const float EPSILON = 0.1f;
+
+	private Vector3 m_CurrGroundDir;
 
 	void Start()
 	{  
 		m_Rb = GetComponent<Rigidbody>();  
 		m_Col = GetComponent<Collider>();
-		m_DistToGround = m_Col.bounds.extents.y;
+		m_CurrGroundDir = Vector3.down;
 	}
 
-	bool IsGrounded() 
+	bool IsGrounded(Vector3 groundDir) 
 	{
-		return Physics.Raycast(transform.position, -Vector3.up, m_DistToGround + EPSILON);
+		float distToGround = Mathf.Abs(Vector3.Dot(m_Col.bounds.extents, groundDir));
+		return Physics.Raycast(transform.position, groundDir, distToGround + EPSILON);
+	}
+
+	Vector3 GetGroundDirection(Vector3 defaultDir)
+	{
+		Vector3[] dirs = {
+				Vector3.up,
+				Vector3.down,
+				Vector3.right,
+				Vector3.left,
+				Vector3.forward,
+				Vector3.back
+		};
+
+		foreach (Vector3 dir in dirs)
+		{
+			if (Physics.Raycast(transform.position, dir)) 
+			{
+				return dir;
+			}
+		}
+
+		return defaultDir;
 	}
 
 	void FixedUpdate()
 	{
-		bool isGrounded = IsGrounded();
+		Vector3 groundDir = GetGroundDirection(m_CurrGroundDir);
+		if (groundDir != m_CurrGroundDir) {
+			// Handle Rotation of cube and player
+			Physics.gravity = groundDir * Physics.gravity.magnitude;
+			m_CurrGroundDir = groundDir;
+		}
+
+		bool isGrounded = IsGrounded(groundDir);
 		float speed = isGrounded ? m_GroundSpeed : m_AirSpeed;
 
 		if (Input.GetButton("Jump") && isGrounded)
 		{
 			m_Rb.AddForce(transform.up * m_JumpForce, ForceMode.Impulse);
 		}
+
+		// change these according to the current orientation of the ground dir
 		Vector3 horizontalTranslation = Input.GetAxis("Horizontal") * transform.right * speed;
 		Vector3 verticalTranslation = Input.GetAxis("Vertical") * transform.forward * speed;
 		Vector3 translation = horizontalTranslation + verticalTranslation;
