@@ -16,6 +16,8 @@ public class PlayerController : MonoBehaviour
 
 	private const float EPSILON = 0.1f;
 	private const float QUARTER_ROTATION = 90.0f;
+	private Vector3 currentEulerAngles;
+
 
 	private Vector3 m_CurrGroundDir;
 
@@ -33,6 +35,28 @@ public class PlayerController : MonoBehaviour
 		float distToGround = Mathf.Abs(Vector3.Dot(m_Col.bounds.extents, groundDir));
 		return Physics.Raycast(transform.position, groundDir, distToGround + EPSILON);
 	}
+
+	void CorrectOrientation()
+    {
+        // Correcting player oreintation
+        Vector3 dir = GetGroundDirection(m_CurrGroundDir);
+        dir = dir.normalized;
+        if(dir.x == 0 && dir.y == 0)
+        {
+            currentEulerAngles = new Vector3(90*dir.z, 0, 0);
+            //switch controls here
+        }
+        if(dir.x == 0 && dir.z == 0)
+        {
+            currentEulerAngles = new Vector3(0, 90*dir.y - 90, 0);
+        }
+        if(dir.y == 0 && dir.z == 0)
+        {
+            currentEulerAngles = new Vector3(0, 0, -90*dir.x);
+        }
+        transform.eulerAngles = currentEulerAngles;
+        Debug.Log(transform.eulerAngles);
+    }
 
 	Vector3 GetGroundDirection(Vector3 defaultDir)
 	{
@@ -114,5 +138,7 @@ public class PlayerController : MonoBehaviour
 
 		// Debug Logs
 		Debug.Log(Physics.gravity.normalized);
+
+		CorrectOrientation();
 	}
 }
