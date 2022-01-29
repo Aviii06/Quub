@@ -16,12 +16,12 @@ public class PlayerController : MonoBehaviour
 
 	private const float EPSILON = 0.1f;
 	private const float QUARTER_ROTATION = 90.0f;
-	private Vector3 currentEulerAngles;
-
 
 	private Vector3 m_CurrGroundDir;
 
 	private bool m_RotationControlsPressed = false;
+
+	private bool m_AreControlsSuspended = false;
 
 	void Start()
 	{  
@@ -57,15 +57,47 @@ public class PlayerController : MonoBehaviour
 				Vector3.back
 		};
 
-		foreach (Vector3 dir in dirs)
-		{
-			if (Physics.Raycast(transform.position, dir)) 
-			{
+		foreach (Vector3 dir in dirs) {
+			if (Physics.Raycast(transform.position, dir)) {
 				return dir;
 			}
 		}
 
 		return defaultDir;
+	}
+
+	void HandleControls() 
+	{
+		// check if grounded
+		bool isGrounded = IsGrounded(m_CurrGroundDir);
+		float speed = isGrounded ? m_GroundSpeed : m_AirSpeed;
+
+		// handle jump
+		if (Input.GetButton("Jump") && isGrounded) {
+			m_Rb.AddForce(transform.up * m_JumpForce, ForceMode.Impulse);
+		}
+
+		// handle rotation
+		float rotationInput = Input.GetAxisRaw("Vertical");
+		if (rotationInput != 0) {
+			if (!m_RotationControlsPressed) {
+				CorrectOrientation();				
+				float rot = rotationInput * QUARTER_ROTATION;
+				transform.RotateAround(transform.position, transform.up, rot);
+
+				m_RotationControlsPressed = true;
+			} 
+		} else {
+			m_RotationControlsPressed = false;
+		} 
+
+		// handle translation
+		Vector3 translation = Input.GetAxis("Horizontal") * transform.right * speed;
+		m_Rb.AddForce(translation, ForceMode.VelocityChange);
+
+		if (m_Rb.velocity.magnitude > m_TerminalVelocity) {
+			m_Rb.velocity = m_Rb.velocity.normalized * m_TerminalVelocity;
+		}
 	}
 
 	void FixedUpdate()
@@ -77,45 +109,9 @@ public class PlayerController : MonoBehaviour
 			m_CurrGroundDir = groundDir;
 		}
 
-
-		// check if grounded
-		bool isGrounded = IsGrounded(groundDir);
-		float speed = isGrounded ? m_GroundSpeed : m_AirSpeed;
-
-
-		// handle jump
-		if (Input.GetButton("Jump") && isGrounded)
-		{
-			m_Rb.AddForce(transform.up * m_JumpForce, ForceMode.Impulse);
-		}
-
-
-		// handle rotation
-		float rotationInput = Input.GetAxisRaw("Vertical");
-		if (rotationInput != 0)
-		{
-			if (!m_RotationControlsPressed)
-			{
-				CorrectOrientation();				
-				float rot = rotationInput * QUARTER_ROTATION;
-				transform.RotateAround(transform.position, transform.up, rot);
-
-				m_RotationControlsPressed = true;
-			} 
-		} 
-		else 
-		{
-			m_RotationControlsPressed = false;
-		} 
-
-
-		// handle translation
-		Vector3 translation = Input.GetAxis("Horizontal") * transform.right * speed;
-		m_Rb.AddForce(translation, ForceMode.VelocityChange);
-
-		if (m_Rb.velocity.magnitude > m_TerminalVelocity) 
-		{
-			m_Rb.velocity = m_Rb.velocity.normalized * m_TerminalVelocity;
+		// handle controls
+		if (!m_AreControlsSuspended) {
+			HandleControls();
 		}
 	}
 }
