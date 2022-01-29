@@ -37,26 +37,14 @@ public class PlayerController : MonoBehaviour
 	}
 
 	void CorrectOrientation()
-    {
-        // Correcting player oreintation
-        Vector3 dir = GetGroundDirection(m_CurrGroundDir);
-        dir = dir.normalized;
-        if(dir.x == 0 && dir.y == 0)
-        {
-            currentEulerAngles = new Vector3(90*dir.z, 0, 0);
-            //switch controls here
-        }
-        if(dir.x == 0 && dir.z == 0)
-        {
-            currentEulerAngles = new Vector3(0, 90*dir.y - 90, 0);
-        }
-        if(dir.y == 0 && dir.z == 0)
-        {
-            currentEulerAngles = new Vector3(0, 0, -90*dir.x);
-        }
-        transform.eulerAngles = currentEulerAngles;
-        Debug.Log(transform.eulerAngles);
-    }
+	{
+		Vector3 currRot = transform.eulerAngles;
+		float rotX = Mathf.Round(currRot.x / QUARTER_ROTATION) * QUARTER_ROTATION;
+		float rotY = Mathf.Round(currRot.y / QUARTER_ROTATION) * QUARTER_ROTATION;
+		float rotZ = Mathf.Round(currRot.z / QUARTER_ROTATION) * QUARTER_ROTATION;
+
+		transform.eulerAngles = new Vector3(rotX, rotY, rotZ);
+	}
 
 	Vector3 GetGroundDirection(Vector3 defaultDir)
 	{
@@ -108,14 +96,9 @@ public class PlayerController : MonoBehaviour
 		{
 			if (!m_RotationControlsPressed)
 			{
-				Vector3 currRot = transform.rotation.eulerAngles;
-				currRot += rotationInput * QUARTER_ROTATION * transform.up;
-
-				// correct rotation
-				float rotX = Mathf.Round(currRot.x / QUARTER_ROTATION) * QUARTER_ROTATION;
-				float rotY = Mathf.Round(currRot.y / QUARTER_ROTATION) * QUARTER_ROTATION;
-				float rotZ = Mathf.Round(currRot.z / QUARTER_ROTATION) * QUARTER_ROTATION;
-				transform.rotation = Quaternion.Euler(rotX, rotY, rotZ);
+				CorrectOrientation();				
+				float rot = rotationInput * QUARTER_ROTATION;
+				transform.RotateAround(transform.position, transform.up, rot);
 
 				m_RotationControlsPressed = true;
 			} 
@@ -134,11 +117,5 @@ public class PlayerController : MonoBehaviour
 		{
 			m_Rb.velocity = m_Rb.velocity.normalized * m_TerminalVelocity;
 		}
-
-
-		// Debug Logs
-		Debug.Log(Physics.gravity.normalized);
-
-		CorrectOrientation();
 	}
 }
