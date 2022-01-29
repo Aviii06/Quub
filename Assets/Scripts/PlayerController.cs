@@ -82,10 +82,19 @@ public class PlayerController : MonoBehaviour
 		float rotationInput = -Input.GetAxisRaw("Vertical");
 		if (rotationInput != 0) {
 			if (!m_RotationControlsPressed) {
+				float cacheSpeed = Vector3.Dot(m_Rb.velocity, transform.right);
+				float cacheAngSpeed = Vector3.Dot(m_Rb.angularVelocity, transform.forward);
+
+				m_Rb.velocity = Vector3.zero;
+				m_Rb.angularVelocity = Vector3.zero;
+
 				CorrectOrientation();				
 				float rot = rotationInput * QUARTER_ROTATION;
 				transform.RotateAround(transform.position, transform.up, rot);
-				CorrectOrientation();					
+				CorrectOrientation();	
+
+				m_Rb.velocity = transform.right * cacheSpeed;
+				m_Rb.angularVelocity = transform.forward * cacheAngSpeed;				
 
 				m_RotationControlsPressed = true;
 			} 
@@ -124,6 +133,5 @@ public class PlayerController : MonoBehaviour
 		if (!m_AreControlsSuspended) {
 			HandleControls();
 		}
-
 	}
 }
