@@ -58,8 +58,9 @@ public class PlayerController : MonoBehaviour
 				Vector3.back
 		};
 
+		int layerMask = 1 << 6; // Only hit the 6th "The Cube" layer
 		foreach (Vector3 dir in dirs) {
-			if (Physics.Raycast(transform.position, dir)) {
+			if (Physics.Raycast(transform.position, dir, Mathf.Infinity, layerMask)) {
 				return dir;
 			}
 		}
