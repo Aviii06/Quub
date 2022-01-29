@@ -14,7 +14,8 @@ public class PlayerController : MonoBehaviour
 
 	public float m_TerminalVelocity = 2.0f;
 
-	private const float EPSILON = 0.1f;
+	private const float EPSILON_DIST = 0.1f;
+	private const float EPSILON_OMEGA = 0.02f;
 	private const float QUARTER_ROTATION = 90.0f;
 
 	private Vector3 m_CurrGroundDir;
@@ -33,7 +34,7 @@ public class PlayerController : MonoBehaviour
 	bool IsGrounded(Vector3 groundDir) 
 	{
 		float distToGround = Mathf.Abs(Vector3.Dot(m_Col.bounds.extents, groundDir));
-		return Physics.Raycast(transform.position, groundDir, distToGround + EPSILON);
+		return Physics.Raycast(transform.position, groundDir, distToGround + EPSILON_DIST);
 	}
 
 	void CorrectOrientation()
@@ -78,12 +79,13 @@ public class PlayerController : MonoBehaviour
 		}
 
 		// handle rotation
-		float rotationInput = Input.GetAxisRaw("Vertical");
+		float rotationInput = -Input.GetAxisRaw("Vertical");
 		if (rotationInput != 0) {
 			if (!m_RotationControlsPressed) {
 				CorrectOrientation();				
 				float rot = rotationInput * QUARTER_ROTATION;
 				transform.RotateAround(transform.position, transform.up, rot);
+				CorrectOrientation();					
 
 				m_RotationControlsPressed = true;
 			} 
@@ -109,9 +111,19 @@ public class PlayerController : MonoBehaviour
 			m_CurrGroundDir = groundDir;
 		}
 
+		if (m_Rb.angularVelocity.magnitude < EPSILON_OMEGA) {
+			if (Mathf.Round(Vector3.Dot(transform.up, -m_CurrGroundDir)) != 1.0f) {
+				Debug.Log("Player fell down, getting him back up!");
+				float angle = Vector3.Angle(transform.up, -m_CurrGroundDir);
+				transform.RotateAround(transform.position, transform.forward, angle);
+				CorrectOrientation();
+			}
+		}
+
 		// handle controls
 		if (!m_AreControlsSuspended) {
 			HandleControls();
 		}
+
 	}
 }
