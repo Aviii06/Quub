@@ -115,7 +115,7 @@ public class PlayerController : MonoBehaviour
 			if (Mathf.Round(Vector3.Dot(transform.up, -m_CurrGroundDir)) != 1.0f) {
 				Debug.Log("Player fell down, getting him back up!");
 				float angle = Vector3.Angle(transform.up, -m_CurrGroundDir);
-				transform.RotateAround(transform.position, transform.forward, angle);
+				transform.RotateAround(transform.position, -transform.forward, angle);
 				CorrectOrientation();
 			}
 		}
