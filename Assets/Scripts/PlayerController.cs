@@ -56,8 +56,21 @@ public class PlayerController : MonoBehaviour
 	void FixedUpdate()
 	{
 		Vector3 groundDir = GetGroundDirection(m_CurrGroundDir);
+		m_Rb.constraints = RigidbodyConstraints.None;
 		if (groundDir != m_CurrGroundDir) {
 			// Handle Rotation of cube and player
+			if (groundDir == Vector3.down || groundDir == Vector3.up)
+			{
+				m_Rb.constraints = RigidbodyConstraints.FreezeRotationZ | RigidbodyConstraints.FreezeRotationY;
+			}
+			else if (groundDir == Vector3.left || groundDir == Vector3.right)
+			{
+				m_Rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
+			}
+			else
+			{
+				m_Rb.constraints = RigidbodyConstraints.FreezeRotationY | RigidbodyConstraints.FreezeRotationY;
+			}
 			Physics.gravity = groundDir * Physics.gravity.magnitude;
 			m_CurrGroundDir = groundDir;
 		}
