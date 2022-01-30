@@ -59,13 +59,19 @@ public class PlayerController : MonoBehaviour
         };
 
         int layerMask = 1 << 6; // Only hit the 6th "The Cube" layer
+        float minDistTillNow = Mathf.Infinity;
+        Vector3 dirToReturn = defaultDir;
         foreach (Vector3 dir in dirs) {
-            if (Physics.Raycast(transform.position, dir, Mathf.Infinity, layerMask)) {
-                return dir;
+        		RaycastHit hit;
+            if (Physics.Raycast(transform.position, dir, out hit, Mathf.Infinity, layerMask)) {
+            	if (hit.distance < minDistTillNow) {
+            		minDistTillNow = hit.distance;
+            		dirToReturn = dir;
+            	}
             }
         }
 
-        return defaultDir;
+        return dirToReturn;
     }
 
     void HandleControls() 
