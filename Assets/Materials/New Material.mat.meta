@@ -1,5 +1,9 @@
 fileFormatVersion: 2
+<<<<<<< HEAD
 guid: 16f544acc54f340f2aa73011558f71f4
+=======
+guid: e3654246063f4424cb40e3691298b538
+>>>>>>> d97cd4c (quub menu)
 NativeFormatImporter:
   externalObjects: {}
   mainObjectFileID: 2100000
